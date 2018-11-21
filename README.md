@@ -16,7 +16,7 @@ Please make sure to update tests as appropriate.
 
 ## Authors
 ### Meta
-Paoge Moua - author
+Paoge Moua - primary author
 * Contact info: paoge.moua@gmail.com OR pobzeb.m@gmail.com
 * Portfolio address: https://paogemoua.github.io/
 * GitHub: https://github.com/paogemoua
