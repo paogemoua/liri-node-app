@@ -1,95 +1,121 @@
+// read and set any environment variables with the dotenv package
 require("dotenv").config();
 
-var spotify = new Spotify(keys.spotify);
-
-// concert-this :: This will search the Bands in Town Artist Events API for an artist and render the following information about each event to the terminal:
-// name of the venue, venue location, date of the event (use moment to format this as "MM/DD/YYYY")
+// use the require keyword to import
+var key = require("./keys.js");
+var fs = require("fs");
+var request = require("request");
+var Spotify = require("node-spotify-api");
 var axios = require("axios");
 
-var nodeArgs = process.argv;
+var command = process.argv[2];
+var userInput = process.argv[3];
 
-var movieName = "";
+// switch command - trigger specified function
+switch (command) {
+    case 'concert-this':
+        getConcert();
+        break;
+    case 'spotify-this-song':
+        showSongInfo();
+        break;
+    case 'movie-this':
+        showMovieInfo();
+        break;
+    case 'do-what-it-say':
+        doWhatItSays();
+        break;
+    default:
+        console.log("Error: please type in the proper command.")
+        break;
+};
+
+// when command is "concert-this" - will run this function
+function getConcert() {
+    var nodeArgs = process.argv;
+
+var artistName = "";
 
 for (var i = 2; i < nodeArgs.length; i++) {
 
     if (i > 2 && i < nodeArgs.length) {
-        movieName = movieName + "+" + nodeArgs[i];
+        artistName = artistName + "+" + nodeArgs[i];
     }
     else {
-        movieName += nodeArgs[i];
+        artistName += nodeArgs[i];
     }
 }
 
-var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
+var queryUrl = "https://rest.bandsintown.com/artists/" + artistName + "/events?app_id=codingbootcamp";
 
 console.log(queryUrl);
 
 axios.get(queryUrl).then(
     function(response) {
-        console.log(response);
-    }
-);
+        console.log("Venue: " + response.venue.name);
+        // console.log("Address: " + response.); // How to gather address info?
+        console.log("Date of the event: " + response.datetime);
 
-// spotify-this-song :: This will show the following information about the song in your terminal/bash window:
-// artist(s), the song's name, a preview link of the song from Spotify, the album that the song is from
+// when command is "spotify-this-song" - will run this function
+function showSongInfo() {
+    var spotify = new Spotify(key.spotify);
 
-// movie-this :: This will output the following information to your terminal/bash window:
-// title, year, IMDB rating, rotten tomatoes rating, country, language, plot, actors
-// default :: 'Mr. Nobody'
+    spotify.search({type: 'track', query: userInput}, function (err, data) {
+        if (err) {
+            return console.log('Error occurred: ' + err);
+        }
+        console.log(
+            "Artist: " + data.tracks.items[0].artists[0].name +
+            "\nSong's Name: " + data.tracks.items[0].name +
+            "\nPreview Link of the Song: " + data.tracks.items[0].preview_url +
+            "\nAlbum the Song is From: " + data.tracks.items[0].album.name
+        );
+    });
+};
 
-// do-what-it-says
-// LIRI will take the text inside of random.txt and then use it to call one of LIRI's commands
-// run spotify-this-song for "I Want It That Way" as follows the text in random.txt; edit the text in random.txt to test out the feature for movie-this and concert-this
+// when command is "movie-this" - will run this function
+function showMovieInfo() {
+    request("http://www.omdbapi.com/?t=" + userInput + "&y=&plot=short&apikey=trilogy", function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            console.log(
+                "Title of the Movie: " + JSON.parse(body).Title +
+                "\nYear: " + JSON.parse(body).Year +
+                "\nIMBD Rating: " + JSON.parse(body).imdbRating +
+                "\nRotten Tomatoes Rating: " + JSON.parse(body).Ratings[1] +
+                "\nCountry: " + JSON.parse(body).Country +
+                "\nLanguage: " + JSON.parse(body).Language +
+                "\nPlot: " + JSON.parse(body).Plot +
+                "\nActors: " + JSON.parse(body).Actors +
+                "\n---------------------------------------------------------\n"
+            );
+        };
+    });
+};
 
-// Include all NPM packages
-var spotify = require("node-spotify-api");
-var axios = require("axios");
-var moment = require("moment");
-var dotnev = require("dotenv").config();
+// when command is "do-what-it-say" - will run this function
+function doWhatItSays() {
+    var spotify = new Spotify(key.spotify);
+    // Read file in random.txt
+    fs.readFile("random.txt","utf8", function (error, data) {
+        // Log error
+        if (error) {
+            return console.log(error);
+        }
 
-// node-spotify-api
-var spotify = new spotify({
-    id: f69f858672c44180929350913474e5c5,
-    secret: e9a9803943944ff7a1879189b755f234
+        var dataAr = data.split(".");
+        // ""
+        if (dataArr[0] --- "concert-this") {
+            userInput = dataArr[1].slice(1,-1);
+            
+        }
+        // "spotify-this-song"
+        else if (dataArr[0] === "spotify-this-song") {
+            userInput = dataArr[1].slice(1,-1);
+            showSongInfo();
+        }
+        // "movie-this"
+        else if (dataArr[0] === "movie-this") {
+            userInput = dataArr[1].slice(1,-1);
+            showMovieInfo();
+        }
 });
-
-spotify.search({ type: 'track', query: 'All the Small Things'}, function(err, data) {
-    if (err) {
-        return console.log('Error occurred: ' + err);
-    }
-
-    console.log(data);
-});
-
-// axios
-var axios = require("axios");
-
-var nodeArgs = process.argv;
-
-var movieName = "";
-
-for (var i = 2; i < nodeArgs.length; i++) {
-
-    if (i > 2 && i < nodeArgs.length) {
-        movieName = movieName + "+" + nodeArgs[i];
-    }
-    else {
-        movieName += nodeArgs[i];
-    }
-}
-
-var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
-
-console.log(queryUrl);
-
-axios.get(queryUrl).then(
-    function(response) {
-        console.log("Release Year: " + response.data.Year);
-    }
-);
-
-// moment
-var moment = require('moment');
-moment().format();
-
-// dotenv (?)
